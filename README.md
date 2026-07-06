@@ -166,7 +166,7 @@ Les erreurs sont affichées proprement dans le terminal.
 
 ## Vérification finale
 
-Avant de présenter le projet, il est possible de vérifier rapidement la syntaxe Python :
+La syntaxe des modules Python peut être vérifiée avec la commande suivante :
 
 ```bash
 python -m py_compile src/__init__.py src/config.py src/transcription.py src/summary.py src/main.py
@@ -301,4 +301,4 @@ Complétion du README avec l'installation, le lancement, l'architecture, les ré
 type README.md
 ```
 
-Vérifier que toutes les consignes du sujet sont présentes.
+Cette vérification permet de relire la documentation finale et de contrôler que les consignes du sujet sont bien couvertes.
