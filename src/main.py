@@ -5,13 +5,14 @@ from pathlib import Path
 import sys
 
 from config import OUTPUT_DIR
+from history import start_history
 from moderation import is_transcription_safe, moderation_message
 from summary import generate_summary
 from transcription import transcribe
 from tts import generate_speech
 
 
-ALLOWED_OPTIONS = {"--save-transcription", "--tts"}
+ALLOWED_OPTIONS = {"--save-transcription", "--tts", "--history"}
 
 
 def _save_summary(markdown: str) -> Path:
@@ -34,31 +35,36 @@ def _save_transcription(transcription: str) -> Path:
     return output_path
 
 
-def _parse_options(arguments: list[str]) -> tuple[str, bool, bool]:
+def _parse_options(arguments: list[str]) -> tuple[str, bool, bool, bool]:
     """Parse the audio path and optional CLI flags."""
 
     if not arguments:
         raise ValueError(
             "Usage : python src/main.py examples/audio.wav "
-            "[--save-transcription] [--tts]"
+            "[--save-transcription] [--tts] [--history]"
         )
 
     audio_path = arguments[0]
     options = set(arguments[1:])
     unknown_options = options - ALLOWED_OPTIONS
     if unknown_options:
-        raise ValueError("Option inconnue. Utilisez : --save-transcription ou --tts")
+        raise ValueError(
+            "Option inconnue. Utilisez : --save-transcription, --tts ou --history"
+        )
 
     save_transcription = "--save-transcription" in options
     generate_audio = "--tts" in options
-    return audio_path, save_transcription, generate_audio
+    interactive_history = "--history" in options
+    return audio_path, save_transcription, generate_audio, interactive_history
 
 
 def main() -> int:
     """Run Scribe from the command line."""
 
     try:
-        audio_path, save_transcription, generate_audio = _parse_options(sys.argv[1:])
+        audio_path, save_transcription, generate_audio, interactive_history = (
+            _parse_options(sys.argv[1:])
+        )
 
         print("Transcription...")
         transcription = transcribe(audio_path)
@@ -88,6 +94,9 @@ def main() -> int:
             print("Synthese vocale...")
             speech_path = generate_speech(summary)
             print(f"Audio sauvegarde : {speech_path}")
+
+        if interactive_history:
+            start_history(summary)
 
         return 0
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
