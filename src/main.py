@@ -5,9 +5,14 @@ from pathlib import Path
 import sys
 
 from config import OUTPUT_DIR
+from history import start_history
 from moderation import is_transcription_safe, moderation_message
 from summary import generate_summary
 from transcription import transcribe
+from tts import generate_speech
+
+
+ALLOWED_OPTIONS = {"--save-transcription", "--tts", "--history"}
 
 
 def _save_summary(markdown: str) -> Path:
@@ -30,20 +35,37 @@ def _save_transcription(transcription: str) -> Path:
     return output_path
 
 
+def _parse_options(arguments: list[str]) -> tuple[str, bool, bool, bool]:
+    """Parse the audio path and optional CLI flags."""
+
+    if not arguments:
+        raise ValueError(
+            "Usage : python src/main.py examples/audio.wav "
+            "[--save-transcription] [--tts] [--history]"
+        )
+
+    audio_path = arguments[0]
+    options = set(arguments[1:])
+    unknown_options = options - ALLOWED_OPTIONS
+    if unknown_options:
+        raise ValueError(
+            "Option inconnue. Utilisez : --save-transcription, --tts ou --history"
+        )
+
+    save_transcription = "--save-transcription" in options
+    generate_audio = "--tts" in options
+    interactive_history = "--history" in options
+    return audio_path, save_transcription, generate_audio, interactive_history
+
+
 def main() -> int:
     """Run Scribe from the command line."""
 
-    if len(sys.argv) not in (2, 3):
-        print("Usage : python src/main.py examples/audio.wav [--save-transcription]")
-        return 1
-
-    audio_path = sys.argv[1]
-    save_transcription = len(sys.argv) == 3 and sys.argv[2] == "--save-transcription"
-    if len(sys.argv) == 3 and not save_transcription:
-        print("Option inconnue. Utilisez : --save-transcription")
-        return 1
-
     try:
+        audio_path, save_transcription, generate_audio, interactive_history = (
+            _parse_options(sys.argv[1:])
+        )
+
         print("Transcription...")
         transcription = transcribe(audio_path)
         transcription_path = None
@@ -53,20 +75,29 @@ def main() -> int:
         if not is_transcription_safe(transcription):
             print(moderation_message())
             if transcription_path:
-                print(f"Transcription sauvegardée : {transcription_path}")
+                print(f"Transcription sauvegardee : {transcription_path}")
             return 1
 
-        print("Résumé...")
+        print("Resume...")
         summary = generate_summary(transcription)
         output_path = _save_summary(summary)
 
         print()
         print(summary)
         print()
-        print("Compte-rendu généré.")
-        print(f"Fichier sauvegardé : {output_path}")
+        print("Compte-rendu genere.")
+        print(f"Fichier sauvegarde : {output_path}")
         if transcription_path:
-            print(f"Transcription sauvegardée : {transcription_path}")
+            print(f"Transcription sauvegardee : {transcription_path}")
+
+        if generate_audio:
+            print("Synthese vocale...")
+            speech_path = generate_speech(summary)
+            print(f"Audio sauvegarde : {speech_path}")
+
+        if interactive_history:
+            start_history(summary)
+
         return 0
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
         print(f"Erreur : {exc}", file=sys.stderr)
