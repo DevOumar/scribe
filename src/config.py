@@ -19,6 +19,8 @@ class Settings:
     groq_api_key: str
     whisper_model: str = "whisper-large-v3-turbo"
     llm_model: str = "llama-3.1-8b-instant"
+    tts_model: str = "canopylabs/orpheus-v1-english"
+    tts_voice: str = "troy"
     temperature: float = 0.2
 
 

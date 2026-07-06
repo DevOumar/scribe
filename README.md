@@ -96,6 +96,22 @@ output/transcription_YYYYMMDD_HHMM.txt
 
 Elle permet de comparer facilement le texte transcrit par Whisper avec le compte-rendu généré par le LLM.
 
+### Fonctionnalite bonus : Text-to-Speech
+
+La branche `feature/tts` ajoute une option pour transformer le compte-rendu Markdown en fichier audio.
+
+```bash
+python src/main.py examples/audio.wav --tts
+```
+
+Le programme genere alors un fichier :
+
+```text
+output/summary_audio_YYYYMMDD_HHMM.wav
+```
+
+Cette fonctionnalite utilise un modele Text-to-Speech Groq et garde le compte-rendu Markdown comme source.
+
 ## Architecture
 
 ```text
@@ -141,6 +157,7 @@ Modèles utilisés dans `src/config.py` :
 
 - Whisper : `whisper-large-v3-turbo`
 - LLM : `llama-3.1-8b-instant`
+- TTS : `canopylabs/orpheus-v1-english`
 - Température : `0.2`
 
 ## Questions
@@ -194,7 +211,7 @@ Les erreurs sont affichées proprement dans le terminal.
 La syntaxe des modules Python peut être vérifiée avec la commande suivante :
 
 ```bash
-python -m py_compile src/__init__.py src/config.py src/transcription.py src/summary.py src/main.py
+python -m py_compile src/__init__.py src/config.py src/transcription.py src/summary.py src/moderation.py src/tts.py src/main.py
 ```
 
 Le projet ne contient aucune clé API en dur. La seule variable attendue est `GROQ_API_KEY`, chargée depuis le fichier `.env`.
@@ -221,6 +238,8 @@ feature/summary
 feature/cli
 ↓
 feature/moderation
+↓
+feature/tts
 ```
 
 Chaque fonctionnalité doit être développée dans une branche indépendante, puis fusionnée dans `dev`.
@@ -235,6 +254,7 @@ feat: implement audio transcription
 feat: implement meeting summarization
 feat: add command line interface
 feat: add transcription moderation
+feat: add text to speech playback
 docs: update README
 ```
 
@@ -345,3 +365,18 @@ python -c "from src.moderation import is_transcription_safe; print(is_transcript
 ```
 
 Le résultat attendu est `False`, car ce texte contient une tentative de détournement.
+
+### PR 8 - Fonctionnalité bonus : Text-to-Speech
+
+**Titre** : `feat: add text to speech playback`
+
+**Description** :
+Ajout d'une option CLI `--tts` qui transforme le compte-rendu Markdown en fichier audio `.wav` avec Groq Text-to-Speech.
+
+**Comment tester** :
+
+```bash
+python src/main.py examples/audio.wav --tts
+```
+
+Le compte-rendu est affiché et sauvegardé comme avant. Un fichier audio `summary_audio_YYYYMMDD_HHMM.wav` est aussi créé dans `output/`.
