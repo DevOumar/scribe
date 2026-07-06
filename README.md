@@ -226,7 +226,7 @@ dir
 dir src
 ```
 
-Vérifier que la structure correspond à l'énoncé.
+Cette commande permet de contrôler rapidement que la structure initiale du projet est en place.
 
 ### PR 2 - Configuration
 
@@ -241,7 +241,7 @@ Ajout du module `src/config.py` pour charger la clé API Groq avec `python-doten
 python -c "from src.config import load_settings; print(load_settings())"
 ```
 
-Avec un `.env` valide, la configuration doit se charger. Sans clé API, une erreur explicite doit être levée.
+Avec un `.env` valide, la configuration se charge correctement. Sans clé API, le programme retourne une erreur explicite.
 
 ### PR 3 - Transcription
 
@@ -256,7 +256,7 @@ Ajout de la fonction `transcribe(audio_path)` qui vérifie l'existence du fichie
 python -c "from src.transcription import transcribe; print(transcribe('examples/audio.wav'))"
 ```
 
-Le test nécessite un fichier audio réel et une clé API Groq valide.
+Ce test utilise un fichier audio réel et une clé API Groq valide.
 
 ### PR 4 - Résumé
 
@@ -271,7 +271,7 @@ Ajout de la fonction `generate_summary(transcription)` qui lit le prompt systèm
 python -c "from src.summary import generate_summary; print(generate_summary('Alice présente le projet. Bob doit envoyer le rapport demain.'))"
 ```
 
-Le résultat doit contenir les sections `Titre`, `Résumé`, `Points clés` et `Décisions / Actions`.
+Le résultat attendu contient les sections `Titre`, `Résumé`, `Points clés` et `Décisions / Actions`.
 
 ### PR 5 - CLI
 
@@ -286,7 +286,7 @@ Ajout du point d'entrée `src/main.py`. Le CLI lance la transcription, génère 
 python src/main.py examples/audio.wav
 ```
 
-Vérifier que le terminal affiche le compte-rendu et qu'un fichier `summary_YYYYMMDD_HHMM.md` est créé dans `output/`.
+Le terminal affiche le compte-rendu et un fichier `summary_YYYYMMDD_HHMM.md` est créé dans `output/`.
 
 ### PR 6 - Documentation finale
 
