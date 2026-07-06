@@ -112,6 +112,16 @@ output/summary_audio_YYYYMMDD_HHMM.wav
 
 Cette fonctionnalite utilise un modele Text-to-Speech Groq et garde le compte-rendu Markdown comme source.
 
+### Fonctionnalite bonus : historique interactif
+
+La branche `feature/history` ajoute un mode interactif pour poser des questions sur le compte-rendu genere.
+
+```bash
+python src/main.py examples/audio.wav --history
+```
+
+Le programme conserve l'historique des questions et des reponses pendant la session. Les reponses doivent rester basees sur le compte-rendu fourni.
+
 ## Architecture
 
 ```text
@@ -211,7 +221,7 @@ Les erreurs sont affichées proprement dans le terminal.
 La syntaxe des modules Python peut être vérifiée avec la commande suivante :
 
 ```bash
-python -m py_compile src/__init__.py src/config.py src/transcription.py src/summary.py src/moderation.py src/tts.py src/main.py
+python -m py_compile src/__init__.py src/config.py src/transcription.py src/summary.py src/moderation.py src/tts.py src/history.py src/main.py
 ```
 
 Le projet ne contient aucune clé API en dur. La seule variable attendue est `GROQ_API_KEY`, chargée depuis le fichier `.env`.
@@ -240,6 +250,8 @@ feature/cli
 feature/moderation
 ↓
 feature/tts
+↓
+feature/history
 ```
 
 Chaque fonctionnalité doit être développée dans une branche indépendante, puis fusionnée dans `dev`.
@@ -255,6 +267,7 @@ feat: implement meeting summarization
 feat: add command line interface
 feat: add transcription moderation
 feat: add text to speech playback
+feat: add interactive summary history
 docs: update README
 ```
 
@@ -380,3 +393,18 @@ python src/main.py examples/audio.wav --tts
 ```
 
 Le compte-rendu est affiché et sauvegardé comme avant. Un fichier audio `summary_audio_YYYYMMDD_HHMM.wav` est aussi créé dans `output/`.
+
+### PR 9 - Fonctionnalite bonus : historique interactif
+
+**Titre** : `feat: add interactive summary history`
+
+**Description** :
+Ajout d'une option CLI `--history` qui ouvre une session interactive apres la generation du compte-rendu. L'utilisateur peut poser des questions, et le LLM repond uniquement a partir du compte-rendu.
+
+**Comment tester** :
+
+```bash
+python src/main.py examples/audio.wav --history
+```
+
+Apres l'affichage du compte-rendu, poser une question dans le terminal. Taper `exit` ou appuyer sur Entree pour quitter le mode interactif.
