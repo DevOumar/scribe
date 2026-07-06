@@ -74,6 +74,22 @@ Compte-rendu généré.
 Fichier sauvegardé : output/summary_YYYYMMDD_HHMM.md
 ```
 
+### Fonctionnalité bonus : sauvegarder la transcription
+
+Le compte-rendu Markdown est toujours sauvegardé dans `output/`. En bonus, le CLI peut aussi sauvegarder la transcription brute avec l'option `--save-transcription` :
+
+```bash
+python src/main.py examples/audio.wav --save-transcription
+```
+
+Cette option crée un fichier supplémentaire :
+
+```text
+output/transcription_YYYYMMDD_HHMM.txt
+```
+
+Elle permet de comparer facilement le texte transcrit par Whisper avec le compte-rendu généré par le LLM.
+
 ## Architecture
 
 ```text
