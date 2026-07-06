@@ -1,2 +1,294 @@
-# scribe
-Scribe - Intelligent note taking tool using Groq AI
+# Scribe
+
+Scribe est un outil CLI Python qui transforme un fichier audio en compte-rendu Markdown.
+
+Le programme :
+
+1. prend un fichier audio en entrée ;
+2. l'envoie à Groq Whisper pour générer une transcription ;
+3. envoie cette transcription à un modèle LLM Groq ;
+4. affiche le compte-rendu dans le terminal ;
+5. sauvegarde le résultat dans le dossier `output/`.
+
+Le projet est volontairement simple : chaque fichier a une responsabilité claire, ce qui le rend facile à expliquer et à défendre à l'oral.
+
+## Installation
+
+### 1. Créer un environnement virtuel
+
+```bash
+python -m venv .venv
+```
+
+Sous Windows :
+
+```bash
+.venv\Scripts\activate
+```
+
+Sous macOS ou Linux :
+
+```bash
+source .venv/bin/activate
+```
+
+### 2. Installer les dépendances
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Créer le fichier `.env`
+
+Copier le fichier d'exemple :
+
+```bash
+copy .env.example .env
+```
+
+Puis ajouter la clé API Groq :
+
+```env
+GROQ_API_KEY=votre_cle_groq
+```
+
+La clé n'est jamais écrite en dur dans le code.
+
+## Lancement
+
+Placer un fichier audio dans `examples/`, puis lancer :
+
+```bash
+python src/main.py examples/audio.wav
+```
+
+Affichage attendu :
+
+```text
+Transcription...
+Résumé...
+
+<compte-rendu markdown>
+
+Compte-rendu généré.
+Fichier sauvegardé : output/summary_YYYYMMDD_HHMM.md
+```
+
+## Architecture
+
+```text
+scribe/
+├── README.md
+├── .gitignore
+├── requirements.txt
+├── .env.example
+├── src/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── config.py
+│   ├── transcription.py
+│   └── summary.py
+├── prompts/
+│   └── system_prompt.txt
+├── examples/
+└── output/
+```
+
+### Rôle des fichiers
+
+- `src/main.py` : point d'entrée CLI.
+- `src/config.py` : chargement de la configuration avec `python-dotenv`.
+- `src/transcription.py` : transcription audio avec Groq Speech-to-Text.
+- `src/summary.py` : génération du compte-rendu avec Groq Chat Completions.
+- `prompts/system_prompt.txt` : consignes données au LLM.
+- `output/` : dossier des comptes-rendus générés.
+
+## Configuration
+
+Le projet utilise `python-dotenv` pour charger les variables d'environnement depuis `.env`.
+
+Variable obligatoire :
+
+```env
+GROQ_API_KEY=
+```
+
+Modèles utilisés dans `src/config.py` :
+
+- Whisper : `whisper-large-v3-turbo`
+- LLM : `llama-3.1-8b-instant`
+- Température : `0.2`
+
+## Questions
+
+### Q1 Pourquoi `.gitignore` doit exister avant toute manipulation de secrets ?
+
+Le fichier `.gitignore` doit être créé avant d'ajouter des fichiers sensibles, car Git peut suivre un fichier dès qu'il est ajouté à l'index. Si un fichier `.env` contenant une clé API est commité une première fois, le secret reste présent dans l'historique Git, même si le fichier est supprimé ensuite.
+
+Créer `.gitignore` dès le début permet d'exclure `.env`, les environnements virtuels et les fichiers générés avant toute erreur de manipulation.
+
+### Q2 Quels modèles Groq sont utilisés et pourquoi ?
+
+Le projet utilise `whisper-large-v3-turbo` pour la transcription. Ce modèle est adapté au Speech-to-Text, rapide et conçu pour convertir un fichier audio en texte.
+
+Le projet utilise `llama-3.1-8b-instant` pour générer le compte-rendu. Ce modèle est suffisant pour produire une synthèse structurée, rapide à exécuter et adapté à un projet CLI simple.
+
+### Q3 Que renvoie Whisper en plus du texte ?
+
+Avec un format de réponse détaillé comme `verbose_json`, Whisper peut renvoyer plus que le texte brut. Il peut fournir des informations comme la langue détectée, la durée, des segments de transcription et parfois des informations temporelles selon les options utilisées.
+
+Dans ce projet, seule la propriété `text` est utilisée pour garder le code simple.
+
+### Q4 Pourquoi choisir cette température ?
+
+La température utilisée est `0.2`. Elle est basse pour limiter la créativité du modèle et favoriser une réponse stable, factuelle et proche de la transcription.
+
+C'est important pour un compte-rendu : le LLM doit reformuler et structurer les informations, pas inventer des décisions ou ajouter du contexte absent.
+
+### Q5 Quel lien entre prompt système et cache de tokens ?
+
+Le prompt système est envoyé au modèle à chaque appel pour définir les règles de comportement : format Markdown, interdiction d'inventer, sections obligatoires.
+
+Comme ce prompt est stable d'un appel à l'autre, il peut bénéficier du cache de tokens côté fournisseur lorsque l'infrastructure le permet. Le cache évite de retraiter entièrement des préfixes identiques, ce qui peut réduire la latence et le coût. Même sans gérer ce cache manuellement dans le code, garder un prompt système fixe et séparé est une bonne pratique.
+
+## Gestion des erreurs
+
+Le programme gère les cas principaux :
+
+- fichier audio introuvable ;
+- clé API manquante ;
+- erreur API Groq pendant la transcription ;
+- erreur API Groq pendant le résumé ;
+- transcription vide ;
+- réponse LLM vide.
+
+Les erreurs sont affichées proprement dans le terminal.
+
+## Workflow Git demandé
+
+Ne jamais travailler directement sur `main`.
+
+Workflow :
+
+```text
+main
+↓
+dev
+↓
+feature/bootstrap
+↓
+feature/config
+↓
+feature/transcription
+↓
+feature/summary
+↓
+feature/cli
+```
+
+Chaque fonctionnalité doit être développée dans une branche indépendante, puis fusionnée dans `dev`.
+
+## Liste exacte des commits
+
+```text
+feat: initialize project structure
+docs: add project documentation
+feat: add configuration module
+feat: implement audio transcription
+feat: implement meeting summarization
+feat: add command line interface
+docs: update README
+```
+
+## Pull Requests
+
+### PR 1 - Bootstrap
+
+**Titre** : `feat: initialize project structure`
+
+**Description** :
+Création de la structure du projet, des dossiers principaux, du `.gitignore`, du fichier `.env.example` et du fichier `requirements.txt`.
+
+**Comment tester** :
+
+```bash
+dir
+dir src
+```
+
+Vérifier que la structure correspond à l'énoncé.
+
+### PR 2 - Configuration
+
+**Titre** : `feat: add configuration module`
+
+**Description** :
+Ajout du module `src/config.py` pour charger la clé API Groq avec `python-dotenv` et centraliser les modèles utilisés.
+
+**Comment tester** :
+
+```bash
+python -c "from src.config import load_settings; print(load_settings())"
+```
+
+Avec un `.env` valide, la configuration doit se charger. Sans clé API, une erreur explicite doit être levée.
+
+### PR 3 - Transcription
+
+**Titre** : `feat: implement audio transcription`
+
+**Description** :
+Ajout de la fonction `transcribe(audio_path)` qui vérifie l'existence du fichier audio et appelle Groq Speech-to-Text.
+
+**Comment tester** :
+
+```bash
+python -c "from src.transcription import transcribe; print(transcribe('examples/audio.wav'))"
+```
+
+Le test nécessite un fichier audio réel et une clé API Groq valide.
+
+### PR 4 - Résumé
+
+**Titre** : `feat: implement meeting summarization`
+
+**Description** :
+Ajout de la fonction `generate_summary(transcription)` qui lit le prompt système et génère un compte-rendu Markdown avec Groq Chat Completions.
+
+**Comment tester** :
+
+```bash
+python -c "from src.summary import generate_summary; print(generate_summary('Alice présente le projet. Bob doit envoyer le rapport demain.'))"
+```
+
+Le résultat doit contenir les sections `Titre`, `Résumé`, `Points clés` et `Décisions / Actions`.
+
+### PR 5 - CLI
+
+**Titre** : `feat: add command line interface`
+
+**Description** :
+Ajout du point d'entrée `src/main.py`. Le CLI lance la transcription, génère le résumé, affiche le résultat et sauvegarde un fichier Markdown dans `output/`.
+
+**Comment tester** :
+
+```bash
+python src/main.py examples/audio.wav
+```
+
+Vérifier que le terminal affiche le compte-rendu et qu'un fichier `summary_YYYYMMDD_HHMM.md` est créé dans `output/`.
+
+### PR 6 - Documentation finale
+
+**Titre** : `docs: update README`
+
+**Description** :
+Complétion du README avec l'installation, le lancement, l'architecture, les réponses aux questions, la liste des commits et les Pull Requests.
+
+**Comment tester** :
+
+```bash
+type README.md
+```
+
+Vérifier que toutes les consignes du sujet sont présentes.
