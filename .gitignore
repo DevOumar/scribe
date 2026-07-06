@@ -13,6 +13,10 @@ env/
 
 # Generated files
 output/*.md
+output/*.txt
+examples/*.wav
+examples/*.mp3
+examples/*.m4a
 
 # IDE and OS files
 .idea/
