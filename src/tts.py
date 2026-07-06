@@ -47,6 +47,12 @@ def generate_speech(markdown: str) -> Path:
         )
         response.write_to_file(output_path)
     except APIError as exc:
+        error_text = str(exc)
+        if "model_terms_required" in error_text:
+            raise RuntimeError(
+                "Le modele TTS Groq demande l'acceptation des conditions "
+                "dans la console Groq avant la premiere utilisation."
+            ) from exc
         raise RuntimeError(f"Erreur API Groq pendant la synthese vocale : {exc}") from exc
 
     return output_path
