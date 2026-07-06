@@ -164,6 +164,16 @@ Le programme gère les cas principaux :
 
 Les erreurs sont affichées proprement dans le terminal.
 
+## Vérification finale
+
+Avant de présenter le projet, il est possible de vérifier rapidement la syntaxe Python :
+
+```bash
+python -m py_compile src/__init__.py src/config.py src/transcription.py src/summary.py src/main.py
+```
+
+Le projet ne contient aucune clé API en dur. La seule variable attendue est `GROQ_API_KEY`, chargée depuis le fichier `.env`.
+
 ## Workflow Git demandé
 
 Ne jamais travailler directement sur `main`.
