@@ -112,6 +112,8 @@ output/summary_audio_YYYYMMDD_HHMM.wav
 
 Cette fonctionnalite utilise un modele Text-to-Speech Groq et garde le compte-rendu Markdown comme source.
 
+Remarque : lors de la premiere utilisation, Groq peut demander d'accepter les conditions du modele TTS dans la console Groq.
+
 ## Architecture
 
 ```text
