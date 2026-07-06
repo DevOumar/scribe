@@ -138,7 +138,9 @@ scribe/
 │   ├── config.py
 │   ├── transcription.py
 │   ├── moderation.py
-│   └── summary.py
+│   ├── summary.py
+│   ├── tts.py
+│   └── history.py
 ├── prompts/
 │   └── system_prompt.txt
 ├── examples/
@@ -147,13 +149,16 @@ scribe/
 
 ### Rôle des fichiers
 
-- `src/main.py` : point d'entrée CLI.
-- `src/config.py` : chargement de la configuration avec `python-dotenv`.
-- `src/transcription.py` : transcription audio avec Groq Speech-to-Text.
-- `src/moderation.py` : contrôle simple des transcriptions avant l'appel au LLM.
-- `src/summary.py` : génération du compte-rendu avec Groq Chat Completions.
-- `prompts/system_prompt.txt` : consignes données au LLM.
-- `output/` : dossier des comptes-rendus générés.
+- `src/main.py` : point d'entrée CLI. Il lit les arguments, lance la transcription, la modération, le résumé et les options bonus.
+- `src/config.py` : chargement de la configuration avec `python-dotenv`. Il centralise la clé API, les modèles Groq et les chemins importants.
+- `src/transcription.py` : transcription audio avec Groq Speech-to-Text. La fonction principale est `transcribe(audio_path)`.
+- `src/moderation.py` : contrôle simple des transcriptions avant l'appel au LLM. Il bloque les tentatives évidentes de détournement.
+- `src/summary.py` : génération du compte-rendu avec Groq Chat Completions. La fonction principale est `generate_summary(transcription)`.
+- `src/tts.py` : fonctionnalité bonus Text-to-Speech. Elle transforme le compte-rendu Markdown en fichier audio `.wav`.
+- `src/history.py` : fonctionnalité bonus d'historique interactif. Elle permet de poser des questions sur le compte-rendu généré.
+- `prompts/system_prompt.txt` : consignes données au LLM pour imposer le format du compte-rendu et éviter les inventions.
+- `examples/` : dossier prévu pour placer les fichiers audio de test.
+- `output/` : dossier des comptes-rendus, transcriptions et audios générés localement.
 
 ## Configuration
 
