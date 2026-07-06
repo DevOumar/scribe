@@ -10,7 +10,7 @@ Le programme :
 4. affiche le compte-rendu dans le terminal ;
 5. sauvegarde le résultat dans le dossier `output/`.
 
-Le projet est volontairement simple : chaque fichier a une responsabilité claire, ce qui le rend facile à expliquer et à défendre à l'oral.
+Le projet garde une structure simple : chaque module correspond à une étape précise du traitement.
 
 ## Installation
 
