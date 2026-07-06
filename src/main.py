@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 
 from config import OUTPUT_DIR
+from moderation import is_transcription_safe, moderation_message
 from summary import generate_summary
 from transcription import transcribe
 
@@ -48,6 +49,12 @@ def main() -> int:
         transcription_path = None
         if save_transcription:
             transcription_path = _save_transcription(transcription)
+
+        if not is_transcription_safe(transcription):
+            print(moderation_message())
+            if transcription_path:
+                print(f"Transcription sauvegardée : {transcription_path}")
+            return 1
 
         print("Résumé...")
         summary = generate_summary(transcription)
